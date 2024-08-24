@@ -1,10 +1,11 @@
 package com.bruno.products.services.impl;
 
 import com.bruno.products.dtos.response.ClienteResponseDTO;
-import com.bruno.products.dtos.response.ComprasOrdenadasResponseDTO;
+import com.bruno.products.dtos.response.CompraResponseDTO;
 import com.bruno.products.dtos.response.ProdutoResponseDTO;
 import com.bruno.products.entities.ClienteEntity;
 import com.bruno.products.entities.CompraEntity;
+import com.bruno.products.repositories.CompraRepository;
 import com.bruno.products.services.ClienteService;
 import com.bruno.products.services.ComprasService;
 import com.bruno.products.services.ProdutoService;
@@ -23,13 +24,38 @@ public class ComprasServiceImpl implements ComprasService {
 
     private final ClienteService clienteService;
 
-    public List<ComprasOrdenadasResponseDTO> retornarComprasOrdenadas() {
+    private final CompraRepository compraRepository;
+
+    @Override
+    public List<CompraResponseDTO> retornarComprasOrdenadas() {
         var clienteList = clienteService.buscarClientes();
-        return ordenarClienteList(clienteList);
+        return extrairListaComprasPorValor(clienteList);
     }
 
-    private List<ComprasOrdenadasResponseDTO> ordenarClienteList(List<ClienteEntity> clienteEntityList) {
-        List<ComprasOrdenadasResponseDTO> listaDeCompras = new ArrayList<>();
+    @Override
+    public CompraResponseDTO retornarMaiorCompraPorAno(Integer ano) {
+        CompraResponseDTO maiorCompra = null;
+        var produtoResponseList = produtoService.buscarProdutosPorAno(ano);
+        var codigoProdutoList = produtoResponseList.stream().map(produto -> produto.getCodigo().toString()).toList();
+        var compraPorCodigoList = compraRepository.findAllByCodigoIn(codigoProdutoList);
+        for (CompraEntity compraEntity : compraPorCodigoList) {
+            var produto = produtoResponseList.stream().filter(p -> p.getCodigo().toString().equals(compraEntity.getCodigo())).findFirst().orElseThrow();
+            var total = calcularvalorTotal(produto, compraEntity);
+            var cliente = clienteService.buscarClientePorCpf(compraEntity.getClienteCpf());
+            if ((maiorCompra == null) || (maiorCompra.getValorTotal() < total)) {
+                maiorCompra = CompraResponseDTO.builder()
+                        .cliente(cliente)
+                        .produto(produto)
+                        .quantidade(compraEntity.getQuantidade())
+                        .valorTotal(total)
+                        .build();
+            }
+        }
+        return maiorCompra;
+    }
+
+    private List<CompraResponseDTO> extrairListaComprasPorValor(List<ClienteEntity> clienteEntityList) {
+        List<CompraResponseDTO> listaDeCompras = new ArrayList<>();
         clienteEntityList.forEach(clienteEntity -> {
             var clienteResponseDTO = ClienteResponseDTO.toClienteResponseDTO(clienteEntity);
             for (CompraEntity compraEntity : clienteEntity.getCompras()) {
@@ -44,8 +70,8 @@ public class ComprasServiceImpl implements ComprasService {
         return produto.getPreco() * compra.getQuantidade();
     }
 
-    private ComprasOrdenadasResponseDTO gerarResponse(ClienteResponseDTO clienteResponseDTO, ProdutoResponseDTO produtoResponseDTO, CompraEntity compraEntity) {
-        return ComprasOrdenadasResponseDTO.builder()
+    private CompraResponseDTO gerarResponse(ClienteResponseDTO clienteResponseDTO, ProdutoResponseDTO produtoResponseDTO, CompraEntity compraEntity) {
+        return CompraResponseDTO.builder()
                 .cliente(clienteResponseDTO)
                 .produto(produtoResponseDTO)
                 .quantidade(compraEntity.getQuantidade())
@@ -53,8 +79,8 @@ public class ComprasServiceImpl implements ComprasService {
                 .build();
     }
 
-    private List<ComprasOrdenadasResponseDTO> ordenar(List<ComprasOrdenadasResponseDTO> lista) {
-        lista.sort(Comparator.comparing(ComprasOrdenadasResponseDTO::getValorTotal));
+    private List<CompraResponseDTO> ordenar(List<CompraResponseDTO> lista) {
+        lista.sort(Comparator.comparing(CompraResponseDTO::getValorTotal));
         return lista;
     }
 

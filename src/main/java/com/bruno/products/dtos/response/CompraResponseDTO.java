@@ -7,7 +7,7 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ComprasOrdenadasResponseDTO {
+public class CompraResponseDTO {
 
     private ClienteResponseDTO cliente;
 

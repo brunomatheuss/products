@@ -10,6 +10,8 @@ import lombok.*;
 @AllArgsConstructor
 public class ProdutoResponseDTO {
 
+    private Long codigo;
+
     private String tipoVinho;
 
     private Double preco;
@@ -20,6 +22,7 @@ public class ProdutoResponseDTO {
 
     public static ProdutoResponseDTO toProdutoResponseDTO(ProdutoEntity produtoEntity) {
         return ProdutoResponseDTO.builder()
+                .codigo(produtoEntity.getCodigo())
                 .tipoVinho(produtoEntity.getTipoVinho())
                 .preco(produtoEntity.getPreco())
                 .safra(produtoEntity.getSafra())
