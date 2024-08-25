@@ -66,7 +66,7 @@ public class ComprasServiceImpl implements ComprasService {
         return ordenar(listaDeCompras);
     }
 
-    private Double calcularvalorTotal(ProdutoResponseDTO produto, CompraEntity compra) {
+    public static Double calcularvalorTotal(ProdutoResponseDTO produto, CompraEntity compra) {
         return produto.getPreco() * compra.getQuantidade();
     }
 

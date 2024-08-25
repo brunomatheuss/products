@@ -1,10 +1,7 @@
 package com.bruno.products.entities;
 
 import com.bruno.products.dtos.CompraDTO;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.ArrayList;
@@ -20,6 +17,10 @@ import java.util.List;
 public class CompraEntity {
 
     @Id
+    @GeneratedValue
+    @Column(name = "ID")
+    private Long id;
+
     @Column(name = "CODIGO")
     private String codigo;
 
