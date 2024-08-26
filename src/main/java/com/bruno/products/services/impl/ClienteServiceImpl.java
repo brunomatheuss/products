@@ -75,13 +75,19 @@ public class ClienteServiceImpl implements ClienteService {
             var quantidadeCompras = clienteEntity.getCompras().size();
             var valorTotal = calcularValorTotalClienteFiel(clienteEntity.getCompras());
             if (maior == null) {
-                maior = ClientesFieisResponseDTO.toClientesFieisResponseDTO(clienteEntity, quantidadeCompras, valorTotal);
+                maior = atualizarMaior(clienteEntity, quantidadeCompras, valorTotal);
             } else if (quantidadeCompras > maior.getQuantidadeCompras()) {
                 if (valorTotal > maior.getValorTotal()) {
-                    maior = ClientesFieisResponseDTO.toClientesFieisResponseDTO(clienteEntity, quantidadeCompras, valorTotal);
+                    maior = atualizarMaior(clienteEntity, quantidadeCompras, valorTotal);
                 }
             }
         }
+        return maior;
+    }
+
+    private static ClientesFieisResponseDTO atualizarMaior(ClienteEntity clienteEntity, int quantidadeCompras, Double valorTotal) {
+        ClientesFieisResponseDTO maior;
+        maior = ClientesFieisResponseDTO.toClientesFieisResponseDTO(clienteEntity, quantidadeCompras, valorTotal);
         return maior;
     }
 
